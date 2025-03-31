@@ -8,4 +8,9 @@ resource "aws_dynamodb_table" "serverless_api_table" {
     name = "id"
     type = "S"
   }
+
+  attribute {
+    name = "name"
+    type = "S"
+  }
 }

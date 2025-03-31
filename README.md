@@ -42,6 +42,11 @@ resource "aws_dynamodb_table" "serverless_api_table" {
     name = "id"
     type = "S"
   }
+
+  attribute {
+    name = "name"
+    type = "S"
+  }
 }
 ```
 
@@ -92,3 +97,44 @@ resource "aws_api_gateway_deployment" "api_deployment" {
   rest_api_id = aws_api_gateway_rest_api.api.id
 }
 ```
+
+### Step 3: Create Lambda Function
+
+1. Paste the following contents into `lambda/lambda_function.py` to put an item to DynamoDB:
+
+```python
+import boto3
+import json
+
+dynamodb_client = boto3.client('dynamodb')
+
+def lambda_handler(event):
+  body = json.loads(event.body)
+
+  dynamodb_client.put_item(
+    TableName='serverless_api_table',
+    Item={
+      'id': {
+        'S': body.get('id')
+      },
+      'name': {
+        'S': body.get('name')
+      }
+    }
+  )
+
+  return {
+    'statusCode': 2200,
+    'body': json.dumps({ 'message': 'Item added successfully!' })
+  }
+```
+
+2. Zip the Lambda function before deploying:
+
+```bash
+cd lambda
+zip -r ../lambda_function.zip .
+cd ..
+```
+
+[Solution for adding the zip command to Git Bash on Windows](https://stackoverflow.com/questions/38782928/how-to-add-man-and-zip-to-git-bash-installation-on-windows)
